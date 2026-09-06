@@ -1,0 +1,39 @@
+{
+  "name": "kite",
+  "version": "1.0.0",
+  "description": "Kite: An all-in-one proactive human companion AI agent on iMessage built with Photon Spectrum",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "dev:terminal": "tsc && node dist/index.js --terminal",
+    "dev:imessage": "tsc && node dist/index.js --imessage",
+    "test:brain": "tsc && node dist/test-brain.js",
+    "add-friend": "tsc && node dist/add-user.js",
+    "start:watchdog": "node scripts/watchdog.js",
+    "tunnel": "ssh -o StrictHostKeyChecking=no -R 80:localhost:3001 nokey@localhost.run"
+  },
+  "keywords": [
+    "imessage",
+    "agent",
+    "companion",
+    "spectrum-ts",
+    "photon",
+    "gemini",
+    "groq"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "dotenv": "^16.4.7",
+    "groq-sdk": "^0.15.0",
+    "spectrum-ts": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3"
+  }
+}

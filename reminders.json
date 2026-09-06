@@ -1,0 +1,56 @@
+[
+  {
+    "id": "rem_gmif2p7",
+    "userId": "test_user_42",
+    "text": "Call Dr. Adams",
+    "dueAt": 1788707257048,
+    "status": "TRIGGERED",
+    "isAlarm": false,
+    "createdAt": "2026-09-06T14:52:37.048Z"
+  },
+  {
+    "id": "rem_i3gj6fn",
+    "userId": "test_user_42",
+    "text": "Water the monstera",
+    "dueAt": 1788706388781,
+    "status": "ACKNOWLEDGED",
+    "isAlarm": false,
+    "createdAt": "2026-09-06T14:52:38.781Z"
+  },
+  {
+    "id": "rem_9qs3iaj",
+    "userId": "tester_web",
+    "text": "Take vitamins",
+    "dueAt": 1788707528835,
+    "status": "ACKNOWLEDGED",
+    "isAlarm": false,
+    "createdAt": "2026-09-06T15:02:08.835Z"
+  },
+  {
+    "id": "rem_n9cqhz5",
+    "userId": "+2349060899495",
+    "text": "Call mum",
+    "dueAt": 1788708522152,
+    "status": "TRIGGERED",
+    "isAlarm": false,
+    "createdAt": "2026-09-06T15:24:42.152Z"
+  },
+  {
+    "id": "rem_1kk1cgw",
+    "userId": "test_user_42",
+    "text": "Call Dr. Adams",
+    "dueAt": 1788721915261,
+    "status": "PENDING",
+    "isAlarm": false,
+    "createdAt": "2026-09-06T18:56:55.261Z"
+  },
+  {
+    "id": "rem_ye8c96r",
+    "userId": "test_user_42",
+    "text": "Water the monstera",
+    "dueAt": 1788721047362,
+    "status": "ACKNOWLEDGED",
+    "isAlarm": false,
+    "createdAt": "2026-09-06T18:56:57.362Z"
+  }
+]

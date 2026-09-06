@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kite — Your Proactive Human Companion on iMessage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #F5F5F7;
+      --surface-card: #FFFFFF;
+      --surface-card-subtle: #FBFBFD;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-focus: #007AFF;
+      --text-primary: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary: #86868B;
+      --apple-blue: #007AFF;
+      --apple-blue-hover: #0062CC;
+      --apple-blue-light: #EBF4FF;
+      --apple-green: #34C759;
+      --apple-orange: #FF9500;
+      --bubble-kite: #E9E9EB;
+      --bubble-kite-text: #000000;
+      --bubble-user: linear-gradient(180deg, #007AFF 0%, #0066D6 100%);
+      --bubble-user-text: #FFFFFF;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.12);
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --transition-fast: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* SVG Icon utility */
+    .icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--apple-blue-light);
+      color: var(--apple-blue);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--apple-green);
+      background: rgba(52, 199, 89, 0.1);
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .status-indicator::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background-color: var(--apple-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.6); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Device Mockup: iPhone Frame */
+    .device-container {
+      background: #000;
+      border-radius: 46px;
+      padding: 12px;
+      box-shadow: var(--shadow-pop), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      max-height: 840px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 84px;
+    }
+
+    .iphone-screen {
+      background: var(--surface-card);
+      border-radius: 36px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+    }
+
+    /* iOS Status Bar & Dynamic Island */
+    .status-bar {
+      height: 48px;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      z-index: 10;
+    }
+
+    .dynamic-island {
+      width: 100px;
+      height: 24px;
+      background: #000;
+      border-radius: var(--radius-full);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 10px;
+    }
+
+    /* iMessage Chat Header */
+    .imessage-header {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .imessage-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .imessage-contact-info {
+      flex: 1;
+    }
+
+    .imessage-contact-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .verified-check {
+      width: 14px;
+      height: 14px;
+      color: var(--apple-blue);
+    }
+
+    .imessage-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Messages Stream */
+    .imessage-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #FFFFFF;
+      scroll-behavior: smooth;
+    }
+
+    .message-date-divider {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      margin: 8px 0;
+    }
+
+    .message-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .message-row.kite {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .message-bubble {
+      padding: 10px 15px;
+      border-radius: 18px;
+      font-size: 14.5px;
+      line-height: 1.42;
+      position: relative;
+      word-break: break-word;
+    }
+
+    .message-row.user .message-bubble {
+      background: var(--bubble-user);
+      color: var(--bubble-user-text);
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-row.kite .message-bubble {
+      background: var(--bubble-kite);
+      color: var(--bubble-kite-text);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Tapback Reaction Badge */
+    .tapback-badge {
+      position: absolute;
+      top: -12px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 2px 7px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+    }
+
+    .message-row.kite .tapback-badge {
+      right: -8px;
+    }
+
+    .message-row.user .tapback-badge {
+      left: -8px;
+    }
+
+    .tapback-badge svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    /* Voice Note Bubble Component */
+    .audio-player-bubble {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bubble-kite);
+      padding: 10px 14px;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      width: 250px;
+    }
+
+    .audio-play-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--apple-blue);
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .audio-play-btn:hover {
+      background: var(--apple-blue-hover);
+    }
+
+    .audio-waveform {
+      flex: 1;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 2.5px;
+    }
+
+    .audio-bar {
+      width: 3px;
+      background: var(--text-tertiary);
+      border-radius: 2px;
+    }
+
+    .audio-duration {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      background: var(--bubble-kite);
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--text-tertiary);
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* Quick Suggestion Chips */
+    .quick-chips-bar {
+      padding: 8px 12px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: var(--surface-card);
+      border-top: 1px solid var(--border-subtle);
+      scrollbar-width: none;
+    }
+
+    .quick-chips-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip-btn {
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-fast);
+    }
+
+    .chip-btn:hover {
+      background: var(--apple-blue-light);
+      color: var(--apple-blue);
+      border-color: rgba(0, 122, 255, 0.3);
+    }
+
+    /* iMessage Composer Input */
+    .imessage-input-bar {
+      padding: 10px 14px;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .media-attach-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .media-attach-btn:hover {
+      background: var(--bg-canvas);
+      color: var(--apple-blue);
+    }
+
+    .input-field-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1.5px solid rgba(0, 0, 0, 0.15);
+      border-radius: 20px;
+      padding: 6px 12px;
+      transition: var(--transition-fast);
+    }
+
+    .input-field-wrapper:focus-within {
+      border-color: var(--border-focus);
+    }
+
+    .chat-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 14.5px;
+      font-family: inherit;
+      color: var(--text-primary);
+    }
+
+    .send-msg-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--apple-blue);
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .send-msg-btn:hover {
+      background: var(--apple-blue-hover);
+    }
+
+    /* RIGHT COLUMN: BENTO GRID DASHBOARD */
+    .bento-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 20px;
+      align-content: start;
+    }
+
+    @media (max-width: 768px) {
+      .bento-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bento-card {
+      background: var(--surface-card);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: var(--transition-fast);
+    }
+
+    .bento-card:hover {
+      border-color: rgba(0, 122, 255, 0.25);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-icon-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .badge-blue { background: linear-gradient(135deg, #007AFF 0%, #0051A8 100%); }
+    .badge-purple { background: linear-gradient(135deg, #AF52DE 0%, #7928CA 100%); }
+    .badge-orange { background: linear-gradient(135deg, #FF9500 0%, #E65100 100%); }
+    .badge-green { background: linear-gradient(135deg, #34C759 0%, #248A3D 100%); }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Reminders List */
+    .reminders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .reminder-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      transition: var(--transition-fast);
+    }
+
+    .reminder-item:hover {
+      background: #FFFFFF;
+      border-color: rgba(0, 122, 255, 0.2);
+    }
+
+    .reminder-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--apple-blue);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: var(--transition-fast);
+    }
+
+    .reminder-checkbox.checked {
+      background: var(--apple-green);
+      border-color: var(--apple-green);
+    }
+
+    .reminder-checkbox.checked svg {
+      display: block;
+    }
+
+    .reminder-checkbox svg {
+      display: none;
+      width: 12px;
+      height: 12px;
+      stroke-width: 3;
+    }
+
+    .reminder-content {
+      flex: 1;
+    }
+
+    .reminder-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .reminder-item.completed .reminder-text {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    .reminder-time {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 12px;
+      color: var(--text-tertiary);
+      font-size: 13px;
+    }
+
+    /* Quick Add Reminder Bar */
+    .quick-add-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .quick-add-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .quick-add-input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .btn-secondary {
+      background: var(--apple-blue);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-fast);
+    }
+
+    .btn-secondary:hover {
+      background: var(--apple-blue-hover);
+    }
+
+    /* Memory Lore Box */
+    .memory-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tag-pill {
+      background: rgba(175, 82, 222, 0.1);
+      color: #AF52DE;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .fact-row {
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: var(--surface-card-subtle);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid #AF52DE;
+    }
+
+    /* Micro-Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .tool-tile {
+      background: var(--surface-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tool-tile:hover {
+      background: #FFFFFF;
+      border-color: rgba(0, 122, 255, 0.3);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tool-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    /* Live iMessage Register Card */
+    .register-card {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #1C1C1E 0%, #2C2C2E 100%);
+      color: white;
+      border: none;
+    }
+
+    @media (max-width: 768px) {
+      .register-card {
+        grid-column: span 1;
+      }
+    }
+
+    .register-card .card-title {
+      color: white;
+    }
+
+    .register-card .card-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .register-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .register-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .register-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .register-btn {
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition-fast);
+    }
+
+    .register-btn:hover {
+      background: #0062CC;
+    }
+
+    .register-alert {
+      margin-top: 10px;
+      font-size: 12.5px;
+      display: none;
+    }
+
+    .register-alert.success {
+      display: block;
+      color: #30D158;
+    }
+
+    .register-alert.error {
+      display: block;
+      color: #FF453A;
+    }
+
+    /* Modal / Hidden Audio Upload Input */
+    #audio-file-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          Kite
+          <span class="brand-badge">Photon Spectrum</span>
+        </div>
+        <div class="brand-sub">Proactive Human Companion for iMessage</div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="status-indicator">Online & Proactive</div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+    <!-- LEFT: iPhone iMessage Simulator -->
+    <div class="device-container">
+      <div class="iphone-screen">
+        
+        <!-- Status Bar with Dynamic Island -->
+        <div class="status-bar">
+          <span id="live-time">9:41</span>
+          <div class="dynamic-island"></div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+            </svg>
+            <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24">
+              <rect x="2" y="7" width="16" height="10" rx="2" ry="2"/>
+              <line x1="22" y1="11" x2="22" y2="13"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- iMessage Contact Header -->
+        <div class="imessage-header">
+          <div class="imessage-avatar">K</div>
+          <div class="imessage-contact-info">
+            <div class="imessage-contact-name">
+              Kite
+              <svg class="icon verified-check" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div class="imessage-subtext">Always with you · iMessage Active</div>
+          </div>
+        </div>
+
+        <!-- Chat Stream -->
+        <div class="imessage-messages" id="chat-messages">
+          <div class="message-date-divider">Today · iMessage</div>
+
+          <!-- Kite Greeting -->
+          <div class="message-row kite">
+            <div class="message-bubble">
+              Hey! I'm Kite, your proactive companion. I keep track of your schedule, remember your life lore, turn voice rambles into action items, and ping you when tasks are due. What are you up to right now?
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="quick-chips-bar">
+          <button class="chip-btn" onclick="sendQuickMessage('Remind me in 1 minute to check the oven')">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Remind in 1m
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Split $84 between 3 people with 20% tip')">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Split $84 Bill
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('I started drinking green matcha tea every morning!')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            Save Habit
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Done')">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            I Did It!
+          </button>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="imessage-input-bar">
+          <button class="media-attach-btn" title="Simulate Voice Memo" onclick="triggerVoiceUpload()">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <input type="file" id="audio-file-input" accept="audio/*,image/*" onchange="handleFileUpload(event)">
+          
+          <div class="input-field-wrapper">
+            <input 
+              type="text" 
+              class="chat-input" 
+              id="message-input" 
+              placeholder="iMessage"
+              autocomplete="off"
+              onkeydown="if(event.key === 'Enter') sendMessage()"
+            />
+          </div>
+
+          <button class="send-msg-btn" onclick="sendMessage()">
+            <svg class="icon" viewBox="0 0 24 24">
+              <line x1="12" y1="19" x2="12" y2="5"/>
+              <polyline points="5 12 12 5 19 12"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: BENTO GRID DASHBOARD -->
+    <div class="bento-container">
+
+      <!-- BENTO 1: ACTIVE REMINDERS & ALARMS -->
+      <div class="bento-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon-badge badge-blue">
+              <svg class="icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Reminders & Alarms</div>
+              <div class="card-subtitle">Auto-dispatches to your iMessage</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reminders-list" id="reminders-container">
+          <div class="empty-state">No pending reminders. Ask Kite to remind you of something!</div>
+        </div>
+
+        <div class="quick-add-group">
+          <input 
+            type="text" 
+            class="quick-add-input" 
+            id="quick-reminder-input" 
+            placeholder="Add reminder (e.g. Call dentist in 30 mins)..."
+            onkeydown="if(event.key === 'Enter') addCustomReminder()"
+          >
+          <button class="btn-secondary" onclick="addCustomReminder()">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add
+          </button>
+        </div>
+      </div>
+
+      <!-- BENTO 2: LONG-TERM LIFE LORE MEMORY -->
+      <div class="bento-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon-badge badge-purple">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Life Lore & Memory</div>
+              <div class="card-subtitle">What Kite learns about you over time</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="memory-tags" id="memory-tags-container">
+          <div class="tag-pill">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span id="tasks-done-count">0</span> Tasks Completed
+          </div>
+        </div>
+
+        <div class="fact-list" id="fact-list-container">
+          <div class="fact-row">Tell Kite about your hobbies, favorite coffee, or daily habits to populate your life lore.</div>
+        </div>
+      </div>
+
+      <!-- BENTO 3: INSTANT MICRO-TOOLS -->
+      <div class="bento-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon-badge badge-orange">
+              <svg class="icon" viewBox="0 0 24 24">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Instant Micro-Tools</div>
+              <div class="card-subtitle">Single-text utilities directly in chat</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tools-grid">
+          <div class="tool-tile" onclick="sendQuickMessage('Split $120 4 ways 18% tip')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Bill & Tip Splitter
+            </div>
+            <div class="tool-desc">Zero-math breakdown for dinners with friends.</div>
+          </div>
+
+          <div class="tool-tile" onclick="sendQuickMessage('Help me polish this text to sound professional and warm: Hey can we push meeting to tomorrow 2pm?')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Text Polisher
+            </div>
+            <div class="tool-desc">Warm, polite drafts for difficult texts or emails.</div>
+          </div>
+
+          <div class="tool-tile" onclick="sendQuickMessage('Voice memo summary: I need to pick up dry cleaning before 5pm, grab oat milk, and email Sarah regarding the pitch deck.')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              Voice Note Triage
+            </div>
+            <div class="tool-desc">Converts verbal brain dumps into categorized tasks.</div>
+          </div>
+
+          <div class="tool-tile" onclick="sendQuickMessage('What do you remember about me so far?')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Life Lore Query
+            </div>
+            <div class="tool-desc">Kite recalls personal facts and ongoing routines.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BENTO 4: PHOTON ARCHITECTURE & REAL IMESSAGE TESTER -->
+      <div class="bento-card register-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon-badge" style="background: rgba(255, 255, 255, 0.2);">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Test on Your Real iPhone iMessage</div>
+              <div class="card-subtitle">Connects your phone number to Kite via Photon Spectrum</div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 13.5px; color: rgba(255, 255, 255, 0.85); line-height: 1.5;">
+          Enter your iPhone number to register as a project tester. Kite will be able to converse and proactively text you reminders right in your Apple Messages app!
+        </p>
+
+        <div class="register-form">
+          <input 
+            type="tel" 
+            class="register-input" 
+            id="tester-phone-input" 
+            placeholder="+1 (555) 000-0000"
+          >
+          <button class="register-btn" onclick="registerTesterPhone()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Register
+          </button>
+        </div>
+        <div id="register-alert" class="register-alert"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const USER_ID = "web_user_" + (localStorage.getItem("kite_user_id") || (() => {
+      const id = Math.random().toString(36).substring(2, 9);
+      localStorage.setItem("kite_user_id", id);
+      return id;
+    })());
+
+    // Update iOS clock
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes();
+      m = m < 10 ? '0' + m : m;
+      document.getElementById('live-time').innerText = `${h}:${m}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Fetch initial reminders and memory
+    async function loadDashboardData() {
+      try {
+        const [remRes, memRes] = await Promise.all([
+          fetch(`/api/reminders/${USER_ID}`),
+          fetch(`/api/memory/${USER_ID}`)
+        ]);
+        if (remRes.ok) {
+          const remData = await remRes.json();
+          renderReminders(remData.all || []);
+        }
+        if (memRes.ok) {
+          const memData = await memRes.json();
+          renderMemory(memData);
+        }
+      } catch (e) {
+        console.error("Dashboard refresh error:", e);
+      }
+    }
+
+    function renderReminders(reminders) {
+      const container = document.getElementById("reminders-container");
+      if (!reminders || reminders.length === 0) {
+        container.innerHTML = '<div class="empty-state">No active reminders. Tell Kite: "Remind me in 5 minutes to stretch"!</div>';
+        return;
+      }
+
+      container.innerHTML = reminders.map(r => {
+        const isDone = r.status === "ACKNOWLEDGED";
+        const isPending = r.status === "PENDING";
+        const dueTime = new Date(r.dueAt);
+        const minsLeft = Math.round((r.dueAt - Date.now()) / 60000);
+        let timeStr = "";
+        if (isDone) {
+          timeStr = "Completed";
+        } else if (minsLeft <= 0) {
+          timeStr = "Due now / fired";
+        } else {
+          timeStr = `Due in ${minsLeft}m (${dueTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+        }
+
+        return `
+          <div class="reminder-item ${isDone ? 'completed' : ''}" id="item-${r.id}">
+            <div class="reminder-checkbox ${isDone ? 'checked' : ''}" onclick="toggleReminder('${r.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="reminder-content">
+              <div class="reminder-text">${escapeHtml(r.text)}</div>
+              <div class="reminder-time">
+                <svg class="icon" style="width: 12px; height: 12px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${timeStr}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderMemory(profile) {
+      if (!profile) return;
+      document.getElementById("tasks-done-count").innerText = profile.tasksCompletedCount || 0;
+
+      const factContainer = document.getElementById("fact-list-container");
+      const facts = profile.facts || [];
+      const habits = profile.habits || [];
+      const combined = [...habits.map(h => `Habit: ${h}`), ...facts];
+
+      if (combined.length === 0) {
+        factContainer.innerHTML = '<div class="fact-row">Tell Kite about your routine, name, or preferences to build your companion memory.</div>';
+      } else {
+        factContainer.innerHTML = combined.map(f => `<div class="fact-row">${escapeHtml(f)}</div>`).join("");
+      }
+    }
+
+    async function toggleReminder(reminderId) {
+      try {
+        const res = await fetch("/api/reminders/toggle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reminderId, userId: USER_ID })
+        });
+        if (res.ok) {
+          loadDashboardData();
+        }
+      } catch (err) {
+        console.error("Toggle error:", err);
+      }
+    }
+
+    async function addCustomReminder() {
+      const input = document.getElementById("quick-reminder-input");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      await sendQuickMessage(text.toLowerCase().includes("remind") ? text : `Remind me: ${text}`);
+    }
+
+    async function sendQuickMessage(text) {
+      const input = document.getElementById("message-input");
+      input.value = text;
+      sendMessage();
+    }
+
+    function appendMessage(sender, text, tapback) {
+      const container = document.getElementById("chat-messages");
+      const row = document.createElement("div");
+      row.className = `message-row ${sender}`;
+
+      let tapbackHtml = "";
+      if (tapback) {
+        const tapIcon = getTapbackIcon(tapback);
+        tapbackHtml = `<div class="tapback-badge">${tapIcon} <span>${tapback}</span></div>`;
+      }
+
+      row.innerHTML = `
+        <div class="message-bubble">
+          ${tapbackHtml}
+          ${escapeHtml(text).replace(/\n/g, '<br>')}
+        </div>
+      `;
+
+      container.appendChild(row);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const container = document.getElementById("chat-messages");
+      const typing = document.createElement("div");
+      typing.id = "typing-row";
+      typing.className = "message-row kite";
+      typing.innerHTML = `
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      `;
+      container.appendChild(typing);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const typing = document.getElementById("typing-row");
+      if (typing) typing.remove();
+    }
+
+    function getTapbackIcon(type) {
+      if (type === "love") return `<svg class="icon" style="color: #FF2D55;" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+      if (type === "like") return `<svg class="icon" style="color: #007AFF;" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+      if (type === "emphasize") return `<svg class="icon" style="color: #FF9500;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+      return `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>`;
+    }
+
+    async function sendMessage(media) {
+      const input = document.getElementById("message-input");
+      const text = input.value.trim();
+      if (!text && !media) return;
+
+      appendMessage("user", text || "Sent an attachment");
+      input.value = "";
+
+      showTypingIndicator();
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: USER_ID,
+            message: text,
+            media
+          })
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+
+        appendMessage("kite", data.reply, data.tapback);
+
+        if (data.activeReminders) {
+          loadDashboardData();
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessage("kite", "Sorry, I had a momentary hiccup. Try again in a second!");
+        console.error("Chat error:", err);
+      }
+    }
+
+    function triggerVoiceUpload() {
+      document.getElementById("audio-file-input").click();
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(",")[1];
+        appendMessage("user", `🎙️ Voice Memo: ${file.name}`);
+        showTypingIndicator();
+
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: USER_ID,
+              message: "Please triage this audio voice memo into action items, reminders, and summary.",
+              media: {
+                mimeType: file.type || "audio/mp3",
+                base64
+              }
+            })
+          });
+
+          const data = await response.json();
+          removeTypingIndicator();
+          appendMessage("kite", data.reply, data.tapback || "love");
+          loadDashboardData();
+        } catch (e) {
+          removeTypingIndicator();
+          appendMessage("kite", "Failed to process audio memo.");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function registerTesterPhone() {
+      const input = document.getElementById("tester-phone-input");
+      const alert = document.getElementById("register-alert");
+      const phone = input.value.trim();
+
+      if (!phone) {
+        alert.className = "register-alert error";
+        alert.innerText = "Please enter a valid phone number (e.g. +14155552671).";
+        return;
+      }
+
+      alert.className = "register-alert";
+      alert.style.display = "block";
+      alert.innerText = "Connecting to Photon Spectrum API...";
+
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber: phone, name: "Judge / Tester" })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alert.className = "register-alert success";
+          const assigned = data.assignedPhoneNumber || "+1 (415) 595-2354";
+          alert.innerHTML = `
+            <div style="font-weight: 600; margin-bottom: 4px;">✓ Phone Authorized!</div>
+            <div>${escapeHtml(data.message)}</div>
+            <div style="margin-top: 8px;">
+              <a href="sms:${assigned}" style="display: inline-block; background: #30D158; color: black; font-weight: 700; padding: 6px 14px; border-radius: 8px; text-decoration: none;">
+                💬 Open in iMessage (${assigned})
+              </a>
+            </div>
+          `;
+          input.value = "";
+        } else {
+          alert.className = "register-alert error";
+          alert.innerText = data.error || "Could not register phone with Photon.";
+        }
+      } catch (err) {
+        alert.className = "register-alert error";
+        alert.innerText = "Error contacting server.";
+      }
+    }
+
+    function escapeHtml(string) {
+      if (!string) return "";
+      const div = document.createElement("div");
+      div.innerText = string;
+      return div.innerHTML;
+    }
+
+    // Auto-poll reminders every 10 seconds
+    setInterval(loadDashboardData, 10000);
+    loadDashboardData();
+  </script>
+</body>
+</html>
