@@ -140,7 +140,7 @@ export class WebGateway {
   private async handleChat(req: http.IncomingMessage, res: http.ServerResponse) {
     try {
       const body = await this.readJsonBody(req);
-      const userText = (body.message || "").trim();
+      const userText = (body.message || body.text || "").trim();
       const userId = body.userId || "web_guest";
       const media = body.media
         ? {
