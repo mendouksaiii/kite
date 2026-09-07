@@ -128,25 +128,53 @@ Format your response as JSON:
     }
 
     // 2. Autonomous Internet Research via WebResearchService (DuckDuckGo + Wikipedia)
-    const searchQuery = userText
+    let searchQuery = userText
       .replace(/^(?:search for|search|lookup|look up|research|can you research|find out|google:?)\s+/i, "")
+      .replace(/\b(?:and\s+)?(?:stop guessing|don't guess|dont guess|no guessing|check online|look it up)\b/gi, "")
       .trim();
+
+    // Context resolution: if searchQuery is empty, vague ("it", "that", "the latest"), or was just a directive ("stop guessing")
+    if (
+      !searchQuery ||
+      searchQuery.length < 4 ||
+      /^(it|that|this|the latest|the latest one|its price|the price)$/i.test(searchQuery)
+    ) {
+      const history = this.memory.getHistory(userId);
+      const userMsgs = history.filter((m) => m.role === "user");
+      // Search backwards for the substantive question
+      for (let i = userMsgs.length - 1; i >= 0; i--) {
+        const prevText = (userMsgs[i].content || "").trim();
+        const cleanedPrev = prevText
+          .replace(/^(?:search for|search|lookup|look up|research|can you research|find out|google:?)\s+/i, "")
+          .replace(/\b(?:and\s+)?(?:stop guessing|don't guess|dont guess|no guessing|check online|look it up)\b/gi, "")
+          .trim();
+        if (cleanedPrev.length >= 4 && !cleanedPrev.toLowerCase().includes("stop guessing")) {
+          searchQuery = cleanedPrev;
+          break;
+        }
+      }
+    }
+
+    if (!searchQuery) {
+      searchQuery = userText;
+    }
 
     console.log(`[AssistantAgent] Performing live web research for: "${searchQuery}"`);
     const findings = await this.researchService.research(searchQuery);
 
-    const prompt = `You are Kite, an empathetic, helpful, and highly capable human companion on Apple iMessage.
+    const prompt = `You are Kite, an empathetic, helpful, and highly accurate human companion on Apple iMessage.
 The user asked you a question requiring real-time internet research:
-"${userText}"
+"${userText}" (Resolved Topic: "${searchQuery}")
 
 Here are the latest live web search findings retrieved from the internet:
 ${findings.evidenceText}
 
-INSTRUCTIONS:
-1. Provide an accurate, verified, up-to-date answer (3 to 4 sentences maximum).
-2. Synthesize the findings conversationally as a helpful companion.
-3. Naturally mention key facts or sources (e.g. "According to reports...", "Wikipedia notes...").
-4. Keep the formatting clean and readable on an iPhone screen.
+CRITICAL INSTRUCTIONS:
+1. Base your answer strictly on the verified live search findings above.
+2. NEVER guess, extrapolate, or invent future models, releases, or prices based on the calendar year (e.g. do NOT invent an iPhone 18 or 19). If an item has not been released yet, state what the current confirmed released model is and what rumors/expected dates exist.
+3. If the user asked you to "stop guessing" or verify facts, address their underlying question directly with the real verified facts from the search findings.
+4. Naturally mention key facts or sources (e.g. "According to reports...", "Apple's latest confirmed release is...").
+5. Keep the formatting clean and readable on an iPhone screen (2 to 4 sentences).
 
 Format as JSON:
 {

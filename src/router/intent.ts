@@ -126,15 +126,32 @@ export function classifyIntent(
     clean.startsWith("research") ||
     clean.startsWith("find out") ||
     clean.startsWith("google") ||
+    clean.includes("stop guessing") ||
+    clean.includes("dont guess") ||
+    clean.includes("don't guess") ||
+    clean.includes("look it up") ||
+    clean.includes("check online") ||
+    clean.match(/what(?:'s| is) the price (?:of|for)/i) ||
+    clean.match(/how much (?:is|does|are|for|cost)/i) ||
+    clean.match(/price of\b/i) ||
+    clean.match(/what(?:'s| is) the (?:latest|newest|current)/i) ||
+    clean.match(/latest\s+[a-z0-9\s]+\s*(?:release|phone|iphone|model|version|edition|status|news)/i) ||
+    clean.match(/when (?:was|is|will)\s+.+\s+(?:released|coming out|launched|announced)/i) ||
+    clean.match(/release date of\b/i) ||
     clean.startsWith("weather in") ||
     clean.startsWith("what's the weather") ||
     clean.startsWith("what is the weather") ||
     clean.startsWith("who won") ||
     clean.startsWith("who is") ||
     clean.startsWith("who was") ||
-    clean.startsWith("what is the latest on") ||
-    clean.startsWith("what's the latest on") ||
-    clean.startsWith("latest news on") ||
+    clean.startsWith("who are") ||
+    clean.startsWith("who made") ||
+    clean.startsWith("who founded") ||
+    clean.startsWith("who owns") ||
+    clean.startsWith("who is the owner of") ||
+    clean.startsWith("what is the latest") ||
+    clean.startsWith("what's the latest") ||
+    clean.startsWith("latest news") ||
     clean.startsWith("what happened to") ||
     clean.startsWith("tell me about") ||
     clean.includes("search the web") ||

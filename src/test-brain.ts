@@ -142,10 +142,23 @@ async function runTests() {
   if (researchRes.intent !== "WEB_SEARCH" || !researchRes.reply) {
     throw new Error("Live internet research failed!");
   }
-  console.log("✓ Test 13 Passed!\n");
+  // Test 14: Context-Aware Research & Anti-Guessing Follow-up
+  console.log("--- Test 14: Context-Aware Research & Anti-Guessing Follow-up ---");
+  const iphoneRes = await brain.processMessage(testUser, "Whats the latest iPhone release then?");
+  console.log("Kite reply (iPhone release):\n", iphoneRes.reply);
+  if (iphoneRes.intent !== "WEB_SEARCH") {
+    throw new Error(`Expected WEB_SEARCH intent for latest iPhone query, got: ${iphoneRes.intent}`);
+  }
+
+  const stopGuessRes = await brain.processMessage(testUser, "Research and stop guessing");
+  console.log("Kite reply (Follow-up resolution):\n", stopGuessRes.reply);
+  if (stopGuessRes.intent !== "WEB_SEARCH" || stopGuessRes.reply.toLowerCase().includes("nat greene")) {
+    throw new Error("Context resolution failed: still searching for Nat Greene's book instead of conversation context!");
+  }
+  console.log("✓ Test 14 Passed!\n");
 
   scheduler.stop();
-  console.log("🎉 ALL 13 KITE TESTS PASSED WITH 100% SUCCESS!");
+  console.log("🎉 ALL 14 KITE TESTS PASSED WITH 100% SUCCESS!");
   process.exit(0);
 }
 

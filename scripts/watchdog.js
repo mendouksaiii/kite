@@ -11,7 +11,7 @@ let consecutiveFailures = 0;
 const MAX_FAILURES = 3;
 const CHECK_INTERVAL_MS = 30000; // 30 seconds
 const PORT = process.env.PORT || 3001;
-const HEALTH_URL = `http://localhost:${PORT}/api/status`;
+const HEALTH_URL = `http://127.0.0.1:${PORT}/api/status`;
 
 console.log(`
 🛡️  KITE WATCHDOG SUPERVISOR ACTIVE
@@ -44,7 +44,7 @@ function startProcess() {
 function checkHealth() {
   if (!childProcess) return;
 
-  const req = http.get(HEALTH_URL, { timeout: 5000 }, (res) => {
+  const req = http.get(HEALTH_URL, { timeout: 10000 }, (res) => {
     if (res.statusCode === 200) {
       consecutiveFailures = 0; // healthy
     } else {
