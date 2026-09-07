@@ -1,12 +1,17 @@
 import { ModelRouter } from "../model-router.js";
 import { MemoryStore } from "../../memory.js";
 import { AgentResponse } from "../types.js";
+import { WebResearchService } from "../../tools/research.js";
 
 export class AssistantAgent {
+  private researchService: WebResearchService;
+
   constructor(
     private memory: MemoryStore,
     private modelRouter: ModelRouter
-  ) {}
+  ) {
+    this.researchService = new WebResearchService();
+  }
 
   async handleGhostwrite(userId: string, userText: string): Promise<AgentResponse> {
     const start = Date.now();
@@ -59,18 +64,10 @@ Format your response as JSON:
     const url = urlMatch[0];
     let pageText = "";
     try {
-      const resp = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KiteBot/1.0" },
-        signal: AbortSignal.timeout(6000),
-      });
-      const html = await resp.text();
-      // Simple tag stripper to extract body text
-      pageText = html
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .slice(0, 4000);
+      pageText = await this.researchService.fetchPageText(url, 4000);
+      if (!pageText) {
+        pageText = `URL: ${url}. (Could not scrape full HTML, summarize based on URL slug).`;
+      }
     } catch (err: any) {
       console.warn("[AssistantAgent] Could not fetch link:", err.message);
       pageText = `URL: ${url}. (Could not scrape full HTML, summarize based on URL slug).`;
@@ -108,7 +105,7 @@ Format your response as JSON:
     const start = Date.now();
     const clean = userText.trim().toLowerCase();
 
-    // Check if weather query
+    // 1. Instant Weather Check via wttr.in
     const weatherMatch = clean.match(/(?:weather in|weather for|temperature in)\s+([a-z\s]+)/i);
     if (weatherMatch) {
       const city = weatherMatch[1].trim();
@@ -126,18 +123,34 @@ Format your response as JSON:
           };
         }
       } catch (err) {
-        // Fall back to AI model
+        // Fall through to full research
       }
     }
 
-    // General Web & Fact Search via Gemini
-    const prompt = `You are Kite's Knowledge Assistant. The user is asking a real-world question or search lookup over iMessage.
-Question: "${userText}"
-Give a verified, concise 2-to-3 sentence answer. Be accurate, informative, and warm. Avoid rambling.
+    // 2. Autonomous Internet Research via WebResearchService (DuckDuckGo + Wikipedia)
+    const searchQuery = userText
+      .replace(/^(?:search for|search|lookup|look up|research|can you research|find out|google:?)\s+/i, "")
+      .trim();
+
+    console.log(`[AssistantAgent] Performing live web research for: "${searchQuery}"`);
+    const findings = await this.researchService.research(searchQuery);
+
+    const prompt = `You are Kite, an empathetic, helpful, and highly capable human companion on Apple iMessage.
+The user asked you a question requiring real-time internet research:
+"${userText}"
+
+Here are the latest live web search findings retrieved from the internet:
+${findings.evidenceText}
+
+INSTRUCTIONS:
+1. Provide an accurate, verified, up-to-date answer (3 to 4 sentences maximum).
+2. Synthesize the findings conversationally as a helpful companion.
+3. Naturally mention key facts or sources (e.g. "According to reports...", "Wikipedia notes...").
+4. Keep the formatting clean and readable on an iPhone screen.
 
 Format as JSON:
 {
-  "reply": "Your concise answer here",
+  "reply": "Your researched answer here",
   "tapback": "like"
 }`;
 
@@ -150,10 +163,10 @@ Format as JSON:
     }
 
     return {
-      reply: parsed.reply || "Here is what I found for you! Let me know if you need any more details.",
+      reply: parsed.reply || `Here is what I found online regarding "${searchQuery}":\n\n${findings.results[0]?.snippet || "I verified the latest information for you."}`,
       tapback: parsed.tapback || "like",
       intent: "WEB_SEARCH",
-      modelUsed: modelRes.modelUsed,
+      modelUsed: `web-research (${modelRes.modelUsed})`,
       latencyMs: Date.now() - start,
     };
   }

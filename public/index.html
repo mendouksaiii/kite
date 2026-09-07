@@ -981,6 +981,10 @@
 
         <!-- Quick Prompt Chips -->
         <div class="quick-chips-bar">
+          <button class="chip-btn" onclick="sendQuickMessage('Research: who won the most recent formula 1 championship?')">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            🔍 Web Research
+          </button>
           <button class="chip-btn" onclick="sendQuickMessage('Morning briefing')">
             <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
             🌅 Morning Brief
@@ -1166,6 +1170,16 @@
               Life Lore Query
             </div>
             <div class="tool-desc">Kite recalls personal facts and ongoing routines.</div>
+          </div>
+
+          <div class="tool-tile" onclick="sendQuickMessage('Research: what are the latest breakthroughs in fusion energy?')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Live Web Research
+            </div>
+            <div class="tool-desc">Autonomous multi-source internet search & deep crawl.</div>
+          </div>
+
           <div class="tool-tile" onclick="sendQuickMessage('50 EUR to USD')">
             <div class="tool-title">
               <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="18" x2="12" y2="20"/><line x1="12" y1="4" x2="12" y2="6"/></svg>

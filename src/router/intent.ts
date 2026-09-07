@@ -118,17 +118,29 @@ export function classifyIntent(
     return "GHOSTWRITE";
   }
 
-  // 11. Live Web & Weather Search
+  // 11. Live Web & Research Search
   if (
+    clean.startsWith("search") ||
+    clean.startsWith("look up") ||
+    clean.startsWith("lookup") ||
+    clean.startsWith("research") ||
+    clean.startsWith("find out") ||
+    clean.startsWith("google") ||
     clean.startsWith("weather in") ||
     clean.startsWith("what's the weather") ||
     clean.startsWith("what is the weather") ||
-    clean.startsWith("search for") ||
-    clean.startsWith("search:") ||
-    clean.startsWith("google:") ||
-    clean.match(/^is\s+.+\s+(?:open|closed)/i) ||
     clean.startsWith("who won") ||
-    clean.startsWith("what is the latest on")
+    clean.startsWith("who is") ||
+    clean.startsWith("who was") ||
+    clean.startsWith("what is the latest on") ||
+    clean.startsWith("what's the latest on") ||
+    clean.startsWith("latest news on") ||
+    clean.startsWith("what happened to") ||
+    clean.startsWith("tell me about") ||
+    clean.includes("search the web") ||
+    clean.includes("look up on the internet") ||
+    clean.includes("research on the web") ||
+    clean.match(/^is\s+.+\s+(?:open|closed)/i)
   ) {
     return "WEB_SEARCH";
   }

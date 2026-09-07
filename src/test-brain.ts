@@ -134,8 +134,18 @@ async function runTests() {
   }
   console.log("✓ Test 12 Passed!\n");
 
+  // Test 13: Live Autonomous Internet Research
+  console.log("--- Test 13: Live Autonomous Internet Research ---");
+  const researchRes = await brain.processMessage(testUser, "Research: who won the most recent formula 1 championship?");
+  console.log("Kite research reply:\n", researchRes.reply);
+  console.log("Model used:", researchRes.modelUsed);
+  if (researchRes.intent !== "WEB_SEARCH" || !researchRes.reply) {
+    throw new Error("Live internet research failed!");
+  }
+  console.log("✓ Test 13 Passed!\n");
+
   scheduler.stop();
-  console.log("🎉 ALL 12 KITE TESTS PASSED WITH 100% SUCCESS!");
+  console.log("🎉 ALL 13 KITE TESTS PASSED WITH 100% SUCCESS!");
   process.exit(0);
 }
 
@@ -143,3 +153,4 @@ runTests().catch((err) => {
   console.error("Test failed:", err);
   process.exit(1);
 });
+
