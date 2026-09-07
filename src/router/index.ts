@@ -4,5 +4,7 @@ export * from "./model-router.js";
 export * from "./agent-router.js";
 export * from "./subagents/microtools.js";
 export * from "./subagents/timekeeper.js";
+export * from "./subagents/tracker.js";
+export * from "./subagents/assistant.js";
 export * from "./subagents/multimodal.js";
 export * from "./subagents/companion.js";

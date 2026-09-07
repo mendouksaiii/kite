@@ -87,6 +87,16 @@ export class WebGateway {
       return this.sendJson(res, profile);
     }
 
+    // --- API: GET TRACKER DATA ---
+    if (url.pathname.startsWith("/api/tracker/") && req.method === "GET") {
+      const userId = decodeURIComponent(url.pathname.replace("/api/tracker/", ""));
+      const expenses = this.memory.getTodayExpenses(userId);
+      const habits = this.memory.getHabits(userId);
+      const hydration = this.memory.getHydration(userId);
+      const profile = this.memory.getProfile(userId);
+      return this.sendJson(res, { expenses, habits, hydration, profile });
+    }
+
     // --- API: REGISTER PHONE WITH PHOTON ---
     if (url.pathname === "/api/register" && req.method === "POST") {
       return this.handleRegister(req, res);
@@ -142,11 +152,17 @@ export class WebGateway {
       const kiteResp = await this.brain.processMessage(userId, userText, media);
       const activeReminders = this.scheduler.getActiveReminders(userId);
       const memoryProfile = this.memory.getProfile(userId);
+      const expenses = this.memory.getTodayExpenses(userId);
+      const habits = this.memory.getHabits(userId);
+      const hydration = this.memory.getHydration(userId);
 
       return this.sendJson(res, {
         ...kiteResp,
         activeReminders,
         memoryProfile,
+        expenses,
+        habits,
+        hydration,
       });
     } catch (err: any) {
       console.error("[WebGateway] Chat error:", err);

@@ -68,6 +68,95 @@ export class TimekeeperAgent {
     };
   }
 
+  handleFocusSprint(userId: string, userText: string): AgentResponse {
+    const start = Date.now();
+    const match = userText.match(/\b(\d+)\b/);
+    const duration = match ? parseInt(match[1], 10) : 25;
+    const safeDuration = Math.min(120, Math.max(1, duration));
+
+    const reminder = this.scheduler.schedule(
+      userId,
+      `🎯 Focus sprint complete! Great work. Take a 5-minute breather and stretch ☕`,
+      safeDuration
+    );
+
+    return {
+      reply: `🎯 FOCUS MODE ENGAGED (${safeDuration} mins)
+────────────────────
+Put away distractions and lock into your flow.
+I'll ping you right when time's up for your break! 🚀`,
+      tapback: "love",
+      effect: "slam",
+      scheduledReminder: reminder,
+      intent: "FOCUS_SPRINT",
+      modelUsed: "timekeeper-focus",
+      latencyMs: Date.now() - start,
+    };
+  }
+
+  async handleDailyBrief(userId: string, isEvening: boolean): Promise<AgentResponse> {
+    const start = Date.now();
+    const active = this.scheduler.getActiveReminders(userId);
+    const profile = this.memory.getProfile(userId);
+    const expenses = this.memory.getTodayExpenses(userId);
+    const hydration = this.memory.getHydration(userId);
+    const habits = this.memory.getHabits(userId);
+    const name = profile.name || "friend";
+
+    if (isEvening) {
+      const reply = `🌙 NIGHTLY WIND-DOWN, ${name}!
+────────────────────
+• ✅ Tasks Completed Today: ${profile.completedTasks}
+• 💳 Today's Spend: $${expenses.total.toFixed(2)} ($${expenses.remaining.toFixed(2)} budget left)
+• 💧 Hydration: ${hydration.currentMl} / ${hydration.targetMl} ml (${hydration.percent}%)
+• 🔥 Habits Active: ${habits.length}
+────────────────────
+Anything you want to offload to tomorrow's list before you get some rest? 😴`;
+
+      return {
+        reply,
+        tapback: "love",
+        intent: "DAILY_BRIEF",
+        modelUsed: "timekeeper-brief",
+        latencyMs: Date.now() - start,
+      };
+    }
+
+    // Morning Launchpad
+    const remindersText =
+      active.length > 0
+        ? active.map((r) => `  • ${r.text}`).join("\n")
+        : "  • No pending alarms (clear schedule!)";
+
+    const habitText =
+      habits.length > 0
+        ? habits.map((h) => `  • ${h.name} (${h.streak} day streak 🔥)`).join("\n")
+        : "  • No active habit streaks yet";
+
+    const reply = `☀️ GOOD MORNING, ${name}!
+Here is your daily launchpad:
+────────────────────
+📋 TODAY'S REMINDERS:
+${remindersText}
+
+🔥 HABITS TO CRUSH:
+${habitText}
+
+💧 HYDRATION TARGET: ${hydration.targetMl} ml
+💰 DAILY BUDGET: $${expenses.budget.toFixed(2)}
+────────────────────
+Let's make today count! What are we conquering first? 🚀`;
+
+    return {
+      reply,
+      tapback: "like",
+      effect: "confetti",
+      intent: "DAILY_BRIEF",
+      modelUsed: "timekeeper-brief",
+      latencyMs: Date.now() - start,
+    };
+  }
+
   async handleTimeQueryOrReminder(
     userId: string,
     userText: string,

@@ -76,9 +76,16 @@ The user sent an audio voice recording over iMessage.
     const context = this.memory.getUserContext(userId, activeCount, remindersSummary);
 
     const systemPrompt = `${getKiteSystemPrompt(context)}
-SPECIAL VISUAL AID INSTRUCTION:
-The user sent an image, document, or screenshot.
-Carefully inspect all text and visual details. Summarize or explain in clear, practical, reassuring terms. If it's a message they want to reply to, offer 2 great options.`;
+SPECIAL VISUAL AID & NUTRITION INSTRUCTION:
+The user sent an image, document, screenshot, or food photo.
+1. If it is a PHOTO OF FOOD/MEALS:
+   - Identify the food items and portion.
+   - Estimate total calories, protein (g), carbs (g), and fat (g).
+   - Populate "nutrition": { "food": "...", "calories": 520, "proteinG": 42, "carbsG": 38, "fatG": 18 }.
+   - In "reply", provide a warm, encouraging macro breakdown.
+2. If it is a DOCUMENT / RECEIPT / SCREENSHOT:
+   - Inspect all text and visual details.
+   - Summarize or offer 2 great reply options if it's a conversation.`;
 
     const modelRes = await this.modelRouter.callGemini(
       systemPrompt,
@@ -94,14 +101,26 @@ Carefully inspect all text and visual details. Summarize or explain in clear, pr
       parsed = { reply: modelRes.rawText };
     }
 
+    // If nutrition was detected, log it to user's daily fuel log
+    if (parsed.nutrition && typeof parsed.nutrition.calories === "number") {
+      this.memory.logNutrition(userId, {
+        food: parsed.nutrition.food || "Meal",
+        calories: parsed.nutrition.calories,
+        proteinG: parsed.nutrition.proteinG || 0,
+        carbsG: parsed.nutrition.carbsG || 0,
+        fatG: parsed.nutrition.fatG || 0,
+      });
+      console.log(`[Nutrition] Logged meal for ${userId}:`, parsed.nutrition);
+    }
+
     if (Array.isArray(parsed.extractedFacts) && parsed.extractedFacts.length > 0) {
       this.memory.addFacts(userId, parsed.extractedFacts);
     }
 
     return {
       reply: parsed.reply || "I took a look at the image! Here is what I see.",
-      tapback: parsed.tapback || "like",
-      effect: parsed.effect || undefined,
+      tapback: parsed.tapback || (parsed.nutrition ? "love" : "like"),
+      effect: parsed.nutrition ? "confetti" : undefined,
       intent: "VISION_DOC",
       modelUsed: modelRes.modelUsed,
       latencyMs: modelRes.latencyMs,

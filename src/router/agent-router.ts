@@ -4,6 +4,8 @@ import { ModelRouter } from "./model-router.js";
 import { IntentDetector } from "./intent.js";
 import { MicroToolAgent } from "./subagents/microtools.js";
 import { TimekeeperAgent } from "./subagents/timekeeper.js";
+import { TrackerAgent } from "./subagents/tracker.js";
+import { AssistantAgent } from "./subagents/assistant.js";
 import { MultimodalAgent } from "./subagents/multimodal.js";
 import { CompanionAgent } from "./subagents/companion.js";
 import { AgentIntent, AgentResponse, InboundMedia } from "./types.js";
@@ -12,6 +14,8 @@ export class AgentRouter {
   private intentDetector: IntentDetector;
   private microtools: MicroToolAgent;
   private timekeeper: TimekeeperAgent;
+  private tracker: TrackerAgent;
+  private assistant: AssistantAgent;
   private multimodal: MultimodalAgent;
   private companion: CompanionAgent;
 
@@ -23,6 +27,8 @@ export class AgentRouter {
     this.intentDetector = new IntentDetector();
     this.microtools = new MicroToolAgent();
     this.timekeeper = new TimekeeperAgent(this.scheduler, this.memory, this.modelRouter);
+    this.tracker = new TrackerAgent(this.memory);
+    this.assistant = new AssistantAgent(this.memory, this.modelRouter);
     this.multimodal = new MultimodalAgent(this.memory, this.scheduler, this.modelRouter);
     this.companion = new CompanionAgent(this.scheduler, this.memory, this.modelRouter);
   }
@@ -56,6 +62,52 @@ export class AgentRouter {
     switch (intent) {
       case "MATH_SPLIT": {
         response = this.microtools.handleBillSplit(cleanText);
+        break;
+      }
+
+      case "UNIT_CONVERT": {
+        response = this.microtools.handleUnitConvert(cleanText);
+        break;
+      }
+
+      case "EXPENSE_TRACK": {
+        response = this.tracker.handleExpense(userId, cleanText);
+        break;
+      }
+
+      case "HABIT_LOG": {
+        response = this.tracker.handleHabit(userId, cleanText);
+        break;
+      }
+
+      case "HYDRATION_LOG": {
+        response = this.tracker.handleHydration(userId, cleanText);
+        break;
+      }
+
+      case "FOCUS_SPRINT": {
+        response = this.timekeeper.handleFocusSprint(userId, cleanText);
+        break;
+      }
+
+      case "DAILY_BRIEF": {
+        const isEvening = lower.includes("night") || lower.includes("wind down");
+        response = await this.timekeeper.handleDailyBrief(userId, isEvening);
+        break;
+      }
+
+      case "GHOSTWRITE": {
+        response = await this.assistant.handleGhostwrite(userId, cleanText);
+        break;
+      }
+
+      case "LINK_SUMMARY": {
+        response = await this.assistant.handleLinkSummary(userId, cleanText);
+        break;
+      }
+
+      case "WEB_SEARCH": {
+        response = await this.assistant.handleWebSearch(userId, cleanText);
         break;
       }
 

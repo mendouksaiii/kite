@@ -2,9 +2,18 @@ import { Reminder } from "../scheduler.js";
 
 export type AgentIntent =
   | "MATH_SPLIT"
+  | "UNIT_CONVERT"
+  | "EXPENSE_TRACK"
+  | "HABIT_LOG"
+  | "HYDRATION_LOG"
+  | "FOCUS_SPRINT"
   | "TASK_ACK"
   | "TIME_QUERY"
   | "SET_REMINDER"
+  | "DAILY_BRIEF"
+  | "GHOSTWRITE"
+  | "LINK_SUMMARY"
+  | "WEB_SEARCH"
   | "VOICE_NOTE"
   | "VISION_DOC"
   | "COMPANION_CHAT";

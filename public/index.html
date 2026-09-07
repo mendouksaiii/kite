@@ -981,17 +981,35 @@
 
         <!-- Quick Prompt Chips -->
         <div class="quick-chips-bar">
-          <button class="chip-btn" onclick="sendQuickMessage('Remind me in 1 minute to check the oven')">
+          <button class="chip-btn" onclick="sendQuickMessage('Morning briefing')">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+            🌅 Morning Brief
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Focus 25')">
             <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Remind in 1m
+            🎯 Focus 25
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Spent $14 on lunch')">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            💳 Spent $14
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('💧')">
+            💧 Water
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Gym done')">
+            🔥 Gym Done
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('50 EUR to USD')">
+            💱 50 EUR to USD
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Draft a polite decline to an invite for drinks tonight')">
+            ✍️ Draft Decline
+          </button>
+          <button class="chip-btn" onclick="sendQuickMessage('Weather in London')">
+            🌤️ Weather
           </button>
           <button class="chip-btn" onclick="sendQuickMessage('Split $84 between 3 people with 20% tip')">
-            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            Split $84 Bill
-          </button>
-          <button class="chip-btn" onclick="sendQuickMessage('I started drinking green matcha tea every morning!')">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-            Save Habit
+            🧾 Split $84
           </button>
           <button class="chip-btn" onclick="sendQuickMessage('Done')">
             <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1148,11 +1166,80 @@
               Life Lore Query
             </div>
             <div class="tool-desc">Kite recalls personal facts and ongoing routines.</div>
+          <div class="tool-tile" onclick="sendQuickMessage('50 EUR to USD')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="18" x2="12" y2="20"/><line x1="12" y1="4" x2="12" y2="6"/></svg>
+              Unit & Currency Converter
+            </div>
+            <div class="tool-desc">1ms deterministic rates for EUR, USD, GBP, lbs/kg.</div>
+          </div>
+
+          <div class="tool-tile" onclick="sendQuickMessage('Focus 25')">
+            <div class="tool-title">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Focus Pomodoro Sprint
+            </div>
+            <div class="tool-desc">Timed focus block with break alerts.</div>
           </div>
         </div>
       </div>
 
-      <!-- BENTO 4: PHOTON ARCHITECTURE & REAL IMESSAGE TESTER -->
+      <!-- BENTO 4: DAILY LIFE & WELLNESS TRACKER -->
+      <div class="bento-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon-badge" style="background: rgba(52, 199, 89, 0.15); color: #34C759;">
+              <svg class="icon" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+              </svg>
+            </div>
+            <div>
+              <div class="card-title">Daily Life & Wellness</div>
+              <div class="card-subtitle">Spending, habits & hydration</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Spending Tracker -->
+          <div style="background: var(--bg-canvas); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
+              <span>💳 Today's Spending</span>
+              <span id="tracker-spending-val">$0.00 / $100.00</span>
+            </div>
+            <div style="background: rgba(0,0,0,0.06); height: 8px; border-radius: 4px; overflow: hidden;">
+              <div id="tracker-spending-bar" style="background: #FF9500; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+            <div id="tracker-spending-note" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Remaining daily budget: $100.00</div>
+          </div>
+
+          <!-- Hydration Tracker -->
+          <div style="background: var(--bg-canvas); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">
+              <span>💧 Hydration</span>
+              <span id="tracker-hydration-val">0 / 2,500 ml (0%)</span>
+            </div>
+            <div style="background: rgba(0,0,0,0.06); height: 8px; border-radius: 4px; overflow: hidden;">
+              <div id="tracker-hydration-bar" style="background: #007AFF; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <span style="font-size: 11px; color: var(--text-secondary);">Target: 2.5L daily</span>
+              <button class="chip-btn" style="padding: 2px 8px; font-size: 11px;" onclick="sendQuickMessage('💧')">+250ml</button>
+            </div>
+          </div>
+
+          <!-- Habit Streaks -->
+          <div style="background: var(--bg-canvas); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="font-size: 12.5px; font-weight: 600; margin-bottom: 8px;">🔥 Active Habit Streaks</div>
+            <div id="tracker-habits-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+              <div style="color: var(--text-secondary); font-size: 11.5px;">No active habits yet. Try: "Gym done" or "Read 20 pages"!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BENTO 5: PHOTON ARCHITECTURE & REAL IMESSAGE TESTER -->
       <div class="bento-card register-card">
         <div class="card-header">
           <div class="card-title-group">
@@ -1208,23 +1295,67 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Fetch initial reminders and memory
+    // Fetch initial reminders and tracker data
     async function loadDashboardData() {
       try {
-        const [remRes, memRes] = await Promise.all([
+        const [remRes, trackerRes] = await Promise.all([
           fetch(`/api/reminders/${USER_ID}`),
-          fetch(`/api/memory/${USER_ID}`)
+          fetch(`/api/tracker/${USER_ID}`)
         ]);
         if (remRes.ok) {
           const remData = await remRes.json();
           renderReminders(remData.all || []);
         }
-        if (memRes.ok) {
-          const memData = await memRes.json();
-          renderMemory(memData);
+        if (trackerRes.ok) {
+          const trackerData = await trackerRes.json();
+          renderTracker(trackerData);
+          if (trackerData.profile) {
+            renderMemory(trackerData.profile);
+          }
         }
       } catch (e) {
         console.error("Dashboard refresh error:", e);
+      }
+    }
+
+    function renderTracker(data) {
+      if (!data) return;
+
+      // 1. Spending
+      if (data.expenses) {
+        const total = data.expenses.total || 0;
+        const budget = data.expenses.budget || 100;
+        const remaining = data.expenses.remaining || 0;
+        const pct = Math.min(100, Math.round((total / budget) * 100));
+
+        document.getElementById("tracker-spending-val").innerText = `$${total.toFixed(2)} / $${budget.toFixed(2)}`;
+        document.getElementById("tracker-spending-bar").style.width = `${pct}%`;
+        document.getElementById("tracker-spending-note").innerText = `Remaining daily budget: $${remaining.toFixed(2)}`;
+      }
+
+      // 2. Hydration
+      if (data.hydration) {
+        const cur = data.hydration.currentMl || 0;
+        const target = data.hydration.targetMl || 2500;
+        const pct = data.hydration.percent || 0;
+
+        document.getElementById("tracker-hydration-val").innerText = `${cur} / ${target} ml (${pct}%)`;
+        document.getElementById("tracker-hydration-bar").style.width = `${pct}%`;
+      }
+
+      // 3. Habits
+      if (data.habits && Array.isArray(data.habits)) {
+        const habitsContainer = document.getElementById("tracker-habits-list");
+        if (data.habits.length === 0) {
+          habitsContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 11.5px;">No active habits yet. Try: "Gym done" or "Read 20 pages"!</div>';
+        } else {
+          habitsContainer.innerHTML = data.habits.map(h => `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #FFF; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+              <span style="font-weight: 500;">${escapeHtml(h.name)}</span>
+              <span style="color: #FF9500; font-weight: 600;">${h.streak}d 🔥</span>
+            </div>
+          `).join("");
+        }
       }
     }
 
@@ -1387,7 +1518,7 @@
 
         appendMessage("kite", data.reply, data.tapback);
 
-        if (data.activeReminders) {
+        if (data.activeReminders || data.expenses || data.habits || data.hydration) {
           loadDashboardData();
         }
       } catch (err) {

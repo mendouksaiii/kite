@@ -19,7 +19,12 @@ export class CompanionAgent {
     const remindersSummary = this.scheduler.getRemindersSummary(userId);
     const context = this.memory.getUserContext(userId, activeCount, remindersSummary);
 
-    const systemPrompt = getKiteSystemPrompt(context);
+    const systemPrompt = `${getKiteSystemPrompt(context)}
+SPECIAL COMPANION & RADAR INSTRUCTION:
+- Extract any new facts about the user into "extractedFacts".
+- If the user mentions a friend's/family member's birthday or anniversary, extract into:
+  "extractedDate": { "name": "Sarah", "dateIso": "2026-10-14", "label": "Birthday" }
+- If a reminder was casually mentioned, extract into "detectedReminder".`;
 
     const modelRes = await this.modelRouter.generateJson(
       systemPrompt,
@@ -38,6 +43,17 @@ export class CompanionAgent {
     if (Array.isArray(parsed.extractedFacts) && parsed.extractedFacts.length > 0) {
       this.memory.addFacts(userId, parsed.extractedFacts);
       console.log(`[Memory] Saved new facts for ${userId}:`, parsed.extractedFacts);
+    }
+
+    // Save important dates / birthday radar
+    if (parsed.extractedDate && parsed.extractedDate.name && parsed.extractedDate.dateIso) {
+      this.memory.addImportantDate(
+        userId,
+        parsed.extractedDate.name,
+        parsed.extractedDate.dateIso,
+        parsed.extractedDate.label || "Birthday"
+      );
+      console.log(`[Radar] Saved important date for ${userId}:`, parsed.extractedDate);
     }
 
     // Opportunistic reminder scheduling if user mentioned a reminder in casual conversation
